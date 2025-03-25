@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventoryPro - Advanced Godot 4.4 Inventory System</title>
+    <style>
+        /* Base styles and reset */
+        :root {
+            --primary: #7b5af2;
+            --primary-dark: #5e43c8;
+            --secondary: #2dc7b5;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --font-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-body: 'Roboto', Arial, sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #25a897;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Header styles */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background-color: rgba(255, 255, 255, 0.98);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            cursor: pointer;
+        }
+
+        /* Hero section */
+        .hero {
+            padding: 10rem 0 5rem;
+            background: linear-gradient(120deg, rgba(123, 90, 242, 0.1) 0%, rgba(45, 199, 181, 0.1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(ellipse at center, rgba(123, 90, 242, 0.3) 0%, rgba(123, 90, 242, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(ellipse at center, rgba(45, 199, 181, 0.3) 0%, rgba(45, 199, 181, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
+            padding-right: 2rem;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .hero-text h1 span {
+            color: var(--primary);
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transform: perspective(1000px) rotateY(-5deg);
+            transition: var(--transition);
+        }
+
+        .hero-image img:hover {
+            transform: perspective(1000px) rotateY(0);
+        }
+
+        .floating-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Features section */
+        .features {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(123, 90, 242, 0.1) 0%, rgba(45, 199, 181, 0.1) 100%);
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .features-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 1000px;
+            position: relative;
+            transform: translateY(-30px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary);
+            background-color: rgba(123, 90, 242, 0.1);
+        }
+        
+        .modal-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+        
+        /* Detailed Features List */
+        .features-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .features-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .features-section h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(123, 90, 242, 0.2);
+        }
+        
+        .detailed-features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        
+        .feature-item:hover {
+            background-color: rgba(123, 90, 242, 0.05);
+            border-color: rgba(123, 90, 242, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .feature-item-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background-color: rgba(123, 90, 242, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-right: 1rem;
+            transition: var(--transition);
+        }
+        
+        .feature-item:hover .feature-item-icon {
+            background-color: var(--primary);
+            color: white;
+            transform: rotate(5deg);
+        }
+        
+        .feature-item-content h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .feature-item-content p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0;
+        }
+
+        /* Demo section */
+        .demo {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+
+        .demo-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            margin: 0 0.5rem 1rem;
+            background-color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .demo-content {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            height: 500px;
+        }
+
+        .tab-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tab-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tab-content p {
+            text-align: center;
+            max-width: 700px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Pricing section */
+        .pricing {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .pricing-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .pricing-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 350px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            position: relative;
+        }
+
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .pricing-header {
+            text-align: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-name {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--gray);
+        }
+
+        .pricing-description {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            display: inline-block;
+            color: var(--success);
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .pricing-features li.disabled {
+            color: var(--gray);
+            text-decoration: line-through;
+        }
+
+        .pricing-features li.disabled::before {
+            content: '✗';
+            color: var(--danger);
+        }
+
+        .pricing-btn {
+            display: block;
+            width: 100%;
+        }
+
+        /* License section */
+        .license {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+
+        .license-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+        }
+
+        .license-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .license-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .license-tab.active {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .license-content {
+            display: none;
+        }
+
+        .license-content.active {
+            display: block;
+        }
+
+        .license-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .license-content p {
+            margin-bottom: 1rem;
+        }
+
+        .license-content ul {
+            list-style: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .license-content ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* FAQ section */
+        .faq {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .accordion {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            background-color: white;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover {
+            background-color: #f1f3f5;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1.5rem;
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 500px;
+            padding: 1.5rem;
+        }
+
+        /* CTA section */
+        .cta {
+            padding: 5rem 0;
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .btn-white:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-dark);
+        }
+
+        .btn-transparent {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-transparent:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            background-color: var(--dark);
+            color: white;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: #bbb;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .mobile-menu-btn span {
+                display: block;
+                width: 25px;
+                height: 3px;
+                background-color: var(--dark);
+                margin: 5px 0;
+                transition: var(--transition);
+            }
+
+            .mobile-menu-btn.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .mobile-menu-btn.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .mobile-menu-btn.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(5px, -5px);
+            }
+
+            .nav-links.mobile-active {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                padding: 1rem;
+                z-index: 1000;
+            }
+
+            .nav-links.mobile-active li {
+                margin: 1rem 0;
+            }
+
+            .hero-content {
+                flex-direction: column;
+            }
+
+            .hero-text, .hero-image {
+                padding-right: 0;
+                margin-bottom: 2rem;
+            }
+            
+            .hero-text {
+                order: 1;
+            }
+            
+            .hero-image {
+                order: 0;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .pricing-card {
+                max-width: 100%;
+            }
+
+            .license-tab {
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <img src="/api/placeholder/40/40" alt="InventoryPro Logo">
+                    Inventory<span>Pro</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#features" class="active">Features</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#license">License</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+                <div class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Advanced <span>Inventory System</span> for Godot 4.4</h1>
+                    <p>A powerful, flexible, and easy-to-use inventory system for your Godot games. Save development time and focus on creating amazing gameplay experiences.</p>
+                    <div class="hero-btns">
+                        <a href="#pricing" class="btn btn-primary">Get Started</a>
+                        <a href="#demo" class="btn btn-outline">View Demo</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="/api/placeholder/600/400" alt="Inventory System Demo">
+                    <div class="floating-badge">Godot 4.4 Ready</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to create a professional inventory system in your Godot 4.4 game</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Drag & Drop Support</h3>
+                    <p>Intuitive drag and drop functionality for item management. Players can easily move items between inventory slots, equipment, and containers.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Item Categories & Filtering</h3>
+                    <p>Organize items into categories and provide smart filtering options. Help players find what they need quickly and efficiently.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Stacking & Quantity System</h3>
+                    <p>Robust item stacking with customizable quantity limits. Handle stackable and non-stackable items with ease.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛠️</div>
+                    <h3>Crafting System</h3>
+                    <p>Comprehensive crafting system with recipes, requirements, and results. Create complex crafting mechanics for your game.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>Save/Load System</h3>
+                    <p>Seamless integration with Godot's save/load functionality. Save inventory states and restore them when players return.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <h3>Easy Integration</h3>
+                    <p>Simple API for connecting with other game systems. Works with your existing code and gameplay mechanics.</p>
+                </div>
+            </div>
+            <div class="features-btn-container">
+                <button class="btn btn-secondary" id="view-all-features-btn">View All Features</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Detailed Features Modal -->
+    <div class="modal" id="features-modal">
+        <div class="modal-content">
+            <div class="modal-close">&times;</div>
+            <div class="modal-header">
+                <h2>Complete Feature List</h2>
+                <p>Everything you need to create professional inventory systems in your Godot 4.4 games</p>
+            </div>
+            <div class="modal-body">
+                <!-- Core Features -->
+                <div class="features-section">
+                    <h3>Core Inventory Features</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📚</div>
+                            <div class="feature-item-content">
+                                <h4>Flexible Grid System</h4>
+                                <p>Create inventory grids of any size with customizable slot arrangements and dimensions.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🧩</div>
+                            <div class="feature-item-content">
+                                <h4>Drag & Drop Support</h4>
+                                <p>Intuitive drag and drop functionality for moving items between inventories and containers.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📊</div>
+                            <div class="feature-item-content">
+                                <h4>Stack Management</h4>
+                                <p>Robust stacking system with customizable stack limits and auto-stacking features.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔢</div>
+                            <div class="feature-item-content">
+                                <h4>Quantity Controls</h4>
+                                <p>Split stacks, input specific quantities, and handle partial transfers between containers.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔎</div>
+                            <div class="feature-item-content">
+                                <h4>Item Tooltips</h4>
+                                <p>Display item information on hover with customizable tooltip templates.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📱</div>
+                            <div class="feature-item-content">
+                                <h4>Mobile Compatibility</h4>
+                                <p>Touch-friendly controls and responsive layouts that work on all device sizes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item Management -->
+                <div class="features-section">
+                    <h3>Item Management</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🏷️</div>
+                            <div class="feature-item-content">
+                                <h4>Category System</h4>
+                                <p>Organize items by type (weapons, armor, consumables, etc.) with customizable categories.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🎭</div>
+                            <div class="feature-item-content">
+                                <h4>Rarity Levels</h4>
+                                <p>Define item rarities with custom colors, effects, and properties.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">⚖️</div>
+                            <div class="feature-item-content">
+                                <h4>Weight System</h4>
+                                <p>Track item weights and implement carrying capacity limits for your inventory.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">💲</div>
+                            <div class="feature-item-content">
+                                <h4>Value & Economy</h4>
+                                <p>Set item values and integrate with in-game economic systems.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📊</div>
+                            <div class="feature-item-content">
+                                <h4>Stat Attributes</h4>
+                                <p>Define custom item properties and stats with modifiers and calculations.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🖼️</div>
+                            <div class="feature-item-content">
+                                <h4>Item Visuals</h4>
+                                <p>Support for item icons, 3D models, and visual customization options.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equipment System -->
+                <div class="features-section">
+                    <h3>Equipment System</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">👕</div>
+                            <div class="feature-item-content">
+                                <h4>Equipment Slots</h4>
+                                <p>Customizable equipment slots for different body parts and equipment types.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔒</div>
+                            <div class="feature-item-content">
+                                <h4>Equip Restrictions</h4>
+                                <p>Implement class, level, stat, or other requirements for equipping items.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔄</div>
+                            <div class="feature-item-content">
+                                <h4>Quick-Swap</h4>
+                                <p>Fast equipment changing and loadout management systems.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📝</div>
+                            <div class="feature-item-content">
+                                <h4>Equipment Sets</h4>
+                                <p>Create and manage equipment sets with bonus effects when complete.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📊</div>
+                            <div class="feature-item-content">
+                                <h4>Stat Modifiers</h4>
+                                <p>Apply and calculate stat changes when items are equipped or unequipped.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">💫</div>
+                            <div class="feature-item-content">
+                                <h4>Visual Feedback</h4>
+                                <p>Instant visual updates when equipping and unequipping items.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Crafting System -->
+                <div class="features-section">
+                    <h3>Crafting System</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📜</div>
+                            <div class="feature-item-content">
+                                <h4>Recipe Management</h4>
+                                <p>Create, edit, and manage crafting recipes with customizable requirements.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">⏲️</div>
+                            <div class="feature-item-content">
+                                <h4>Crafting Time</h4>
+                                <p>Implement crafting duration with progress bars and notifications.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🎮</div>
+                            <div class="feature-item-content">
+                                <h4>Mini-Games</h4>
+                                <p>Add interactive mini-games to the crafting process for player engagement.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🎲</div>
+                            <div class="feature-item-content">
+                                <h4>Success Rate</h4>
+                                <p>Probability-based success rates with critical failures and successes.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔨</div>
+                            <div class="feature-item-content">
+                                <h4>Crafting Stations</h4>
+                                <p>Create location-specific crafting with different station types and capabilities.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📚</div>
+                            <div class="feature-item-content">
+                                <h4>Recipe Discovery</h4>
+                                <p>Systems for learning, unlocking, and discovering new crafting recipes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Shop & Trading -->
+                <div class="features-section">
+                    <h3>Shop & Trading</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🏪</div>
+                            <div class="feature-item-content">
+                                <h4>Merchant System</h4>
+                                <p>Create NPC vendors with customizable inventories and refresh rates.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">💲</div>
+                            <div class="feature-item-content">
+                                <h4>Dynamic Pricing</h4>
+                                <p>Price fluctuations based on supply, demand, player reputation, or other factors.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔄</div>
+                            <div class="feature-item-content">
+                                <h4>Barter Trading</h4>
+                                <p>Item-for-item exchanges with value estimation and negotiation mechanics.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🌟</div>
+                            <div class="feature-item-content">
+                                <h4>Special Offers</h4>
+                                <p>Create limited-time deals, discounts, and special merchant inventory.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🏦</div>
+                            <div class="feature-item-content">
+                                <h4>Multiple Currencies</h4>
+                                <p>Support for multiple in-game currencies and exchange rates.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📦</div>
+                            <div class="feature-item-content">
+                                <h4>Buy/Sell History</h4>
+                                <p>Track transaction history and implement buyback features.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Storage & Organization -->
+                <div class="features-section">
+                    <h3>Storage & Organization</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🗄️</div>
+                            <div class="feature-item-content">
+                                <h4>Multiple Inventories</h4>
+                                <p>Support for multiple inventory types (player, chest, bank, etc.) with easy switching.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📂</div>
+                            <div class="feature-item-content">
+                                <h4>Auto-Sorting</h4>
+                                <p>One-click inventory organization by type, value, rarity, and other properties.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔍</div>
+                            <div class="feature-item-content">
+                                <h4>Search Functionality</h4>
+                                <p>Find items quickly with search and advanced filtering options.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📌</div>
+                            <div class="feature-item-content">
+                                <h4>Item Pinning</h4>
+                                <p>Pin favorite items or lock them to prevent accidental selling or dropping.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔄</div>
+                            <div class="feature-item-content">
+                                <h4>Quick Transfer</h4>
+                                <p>One-click transfer buttons for moving items between container types.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📊</div>
+                            <div class="feature-item-content">
+                                <h4>Tab System</h4>
+                                <p>Organize inventory with customizable tabs for different item categories.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Technical Features -->
+                <div class="features-section">
+                    <h3>Technical Features</h3>
+                    <div class="detailed-features-list">
+                        <div class="feature-item">
+                            <div class="feature-item-icon">💾</div>
+                            <div class="feature-item-content">
+                                <h4>Save/Load System</h4>
+                                <p>Integrated persistence with Godot's built-in saving mechanisms.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🎛️</div>
+                            <div class="feature-item-content">
+                                <h4>Signal System</h4>
+                                <p>Comprehensive signals for inventory events and state changes.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">🔌</div>
+                            <div class="feature-item-content">
+                                <h4>API Access</h4>
+                                <p>Clean, documented API for integrating with other game systems.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📱</div>
+                            <div class="feature-item-content">
+                                <h4>Responsive UI</h4>
+                                <p>Adaptive layouts that work across different resolutions and platforms.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">⚡</div>
+                            <div class="feature-item-content">
+                                <h4>Performance Optimized</h4>
+                                <p>Efficient code with minimal impact on game performance.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-item-icon">📋</div>
+                            <div class="feature-item-content">
+                                <h4>Inspector Tools</h4>
+                                <p>Custom inspector interfaces for easy configuration in the Godot editor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="section-title">
+                <h2>See It In Action</h2>
+                <p>Experience the flexibility and power of our inventory system</p>
+            </div>
+            <div class="demo-tabs">
+                <button class="tab-btn active" data-tab="tab1">Basic Inventory</button>
+                <button class="tab-btn" data-tab="tab2">Equipment System</button>
+                <button class="tab-btn" data-tab="tab3">Crafting Interface</button>
+                <button class="tab-btn" data-tab="tab4">Shop Integration</button>
+            </div>
+            <div class="demo-content">
+                <div class="tab-content active" id="tab1">
+                    <img src="/api/placeholder/800/400" alt="Basic Inventory Demo">
+                    <h3>Flexible Grid-Based Inventory</h3>
+                    <p>Our inventory system supports customizable grid layouts, item tooltips, context menus, and drag-and-drop functionality. Perfect for RPGs, survival games, and any project that needs item management.</p>
+                </div>
+                <div class="tab-content" id="tab2">
+                    <img src="/api/placeholder/800/400" alt="Equipment System Demo">
+                    <h3>Intuitive Equipment System</h3>
+                    <p>Let players equip items to different body slots with visual feedback. Supports equipment restrictions, stat bonuses, and appearance changes when items are equipped.</p>
+                </div>
+                <div class="tab-content" id="tab3">
+                    <img src="/api/placeholder/800/400" alt="Crafting Interface Demo">
+                    <h3>Complete Crafting System</h3>
+                    <p>Implement complex crafting with recipes, required materials, and crafting stations. Includes features like crafting time, success rates, and result variations.</p>
+                </div>
+                <div class="tab-content" id="tab4">
+                    <img src="/api/placeholder/800/400" alt="Shop Integration Demo">
+                    <h3>Merchant & Economy Features</h3>
+                    <p>Easily create shops and trading systems. Includes support for buy/sell mechanics, dynamic pricing, and merchant inventories that refresh over time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Simple Pricing</h2>
+                <p>Choose the license that fits your project needs</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Indie License</h3>
+                        <div class="pricing-price">$49<span>/one-time</span></div>
+                        <p class="pricing-description">Perfect for small indie developers and hobbyists</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Full Source Code</li>
+                        <li>Basic Documentation</li>
+                        <li>Email Support</li>
+                        <li>Use in One Commercial Project</li>
+                        <li>Free Updates</li>
+                        <li class="disabled">Priority Support</li>
+                        <li class="disabled">Custom Modifications</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary pricing-btn">Purchase Now</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Professional License</h3>
+                        <div class="pricing-price">$129<span>/one-time</span></div>
+                        <p class="pricing-description">For professional game developers and studios</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Full Source Code</li>
+                        <li>Complete Documentation</li>
+                        <li>Priority Email Support</li>
+                        <li>Use in Up to 5 Commercial Projects</li>
+                        <li>Lifetime Updates</li>
+                        <li>Priority Bug Fixes</li>
+                        <li class="disabled">Custom Modifications</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary pricing-btn">Purchase Now</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Enterprise License</h3>
+                        <div class="pricing-price">$299<span>/one-time</span></div>
+                        <p class="pricing-description">For larger teams and commercial studios</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Full Source Code</li>
+                        <li>Complete Documentation</li>
+                        <li>Priority Email & Discord Support</li>
+                        <li>Unlimited Commercial Projects</li>
+                        <li>Lifetime Updates</li>
+                        <li>Priority Bug Fixes</li>
+                        <li>Custom Modification Support</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary pricing-btn">Purchase Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- License Section -->
+    <section class="license" id="license">
+        <div class="container">
+            <div class="section-title">
+                <h2>License Information</h2>
+                <p>Understanding what you can and cannot do with our inventory system</p>
+            </div>
+            <div class="license-box">
+                <div class="license-tabs">
+                    <div class="license-tab active" data-license="usage">Usage Rights</div>
+                    <div class="license-tab" data-license="restrictions">Restrictions</div>
+                    <div class="license-tab" data-license="attribution">Attribution</div>
+                    <div class="license-tab" data-license="modifications">Modifications</div>
+                    <div class="license-tab" data-license="support">Support & Updates</div>
+                </div>
+                <div class="license-content active" id="usage">
+                    <h3>Usage Rights</h3>
+                    <p>Depending on the license you purchase, you are granted the following rights:</p>
+                    <ul>
+                        <li><strong>Indie License:</strong> Use in one commercial or non-commercial project by a single developer or small team (up to 3 people).</li>
+                        <li><strong>Professional License:</strong> Use in up to five commercial or non-commercial projects by a team of any size.</li>
+                        <li><strong>Enterprise License:</strong> Use in unlimited commercial or non-commercial projects by a team of any size.</li>
+                    </ul>
+                    <p>All licenses include the right to distribute the compiled version of your game without any additional royalties or fees.</p>
+                </div>
+                <div class="license-content" id="restrictions">
+                    <h3>Restrictions</h3>
+                    <p>The following restrictions apply to all license types:</p>
+                    <ul>
+                        <li>You may not resell, redistribute, or sublicense the inventory system source code itself.</li>
+                        <li>You may not use the inventory system in a game template that you sell to others.</li>
+                        <li>You may not create derivative asset packs based on this inventory system.</li>
+                        <li>You may not claim that you created the inventory system.</li>
+                    </ul>
+                    <p>These restrictions are in place to protect our intellectual property while allowing you the freedom to use the system in your games.</p>
+                </div>
+                <div class="license-content" id="attribution">
+                    <h3>Attribution</h3>
+                    <p>Attribution is appreciated but not required. If you wish to provide attribution, you can include the following in your game's credits:</p>
+                    <p>"Inventory system powered by InventoryPro for Godot"</p>
+                    <p>You may also include a link to our website if you wish, but this is entirely optional.</p>
+                </div>
+                <div class="license-content" id="modifications">
+                    <h3>Modifications</h3>
+                    <p>You are permitted to modify the inventory system source code to suit your project needs. However:</p>
+                    <ul>
+                        <li>Modifications do not grant you additional rights beyond what your license permits.</li>
+                        <li>You may not distribute your modified version of the source code separately from your game.</li>
+                        <li>You retain all modifications you make for your own use.</li>
+                    </ul>
+                    <p>The Enterprise license includes support for custom modifications if you need assistance adapting the system to your specific requirements.</p>
+                </div>
+                <div class="license-content" id="support">
+                    <h3>Support & Updates</h3>
+                    <p>Support and update policies vary by license:</p>
+                    <ul>
+                        <li><strong>Indie License:</strong> Basic email support and minor updates for 6 months.</li>
+                        <li><strong>Professional License:</strong> Priority email support and all updates for the lifetime of the product.</li>
+                        <li><strong>Enterprise License:</strong> Priority email and Discord support, all updates for the lifetime of the product, and custom modification assistance.</li>
+                    </ul>
+                    <p>We are committed to maintaining compatibility with the latest versions of Godot and addressing any bugs or issues that arise.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Find answers to common questions about our inventory system</p>
+            </div>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">Is the inventory system compatible with Godot 4.4?</div>
+                    <div class="accordion-content">
+                        <p>Yes, our inventory system is fully compatible with Godot 4.4. We actively maintain the system and update it to support the latest Godot versions as they are released.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Can I use the inventory system in a commercial game?</div>
+                    <div class="accordion-content">
+                        <p>Absolutely! All license types (Indie, Professional, and Enterprise) allow you to use the inventory system in commercial games. The only difference is the number of projects you can use it in, as specified in the license details.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Do I need programming skills to use this system?</div>
+                    <div class="accordion-content">
+                        <p>Basic GDScript knowledge is recommended to integrate the inventory system into your game effectively. However, the system comes with comprehensive documentation and examples to help you get started, even with limited programming experience.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Can I modify the inventory system to fit my game's needs?</div>
+                    <div class="accordion-content">
+                        <p>Yes, all licenses allow you to modify the source code to customize the inventory system for your specific requirements. The modular design makes it easy to adapt to different game types and UI styles.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">What kind of support is provided?</div>
+                    <div class="accordion-content">
+                        <p>Support varies by license type. The Indie license includes basic email support for 6 months. The Professional license offers priority email support for the lifetime of the product. The Enterprise license provides priority email and Discord support, plus assistance with custom modifications.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Can I see a demo before purchasing?</div>
+                    <div class="accordion-content">
+                        <p>Yes, we offer a limited demo version that you can try before purchasing. The demo includes basic functionality but has some features disabled. Visit our website to download the demo and explore the system.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">How does the save/load system work?</div>
+                    <div class="accordion-content">
+                        <p>Our inventory system integrates seamlessly with Godot's built-in save/load functionality. It uses a serialization system to convert inventory data into a format that can be easily saved and loaded. The system handles complex item data, including custom properties, quantities, and equipped status.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Can I use this for mobile games?</div>
+                    <div class="accordion-content">
+                        <p>Yes, the inventory system is fully compatible with mobile platforms. It includes touch-friendly interfaces and optimized performance for mobile devices. The UI automatically adapts to different screen sizes and orientations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Enhance Your Godot Game?</h2>
+            <p>Save development time and add professional inventory features to your project today.</p>
+            <div class="cta-buttons">
+                <a href="#pricing" class="btn btn-white">Get Started Now</a>
+                <a href="#demo" class="btn btn-transparent">View Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-column">
+                    <h3>InventoryPro</h3>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#license">License</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Bug Reports</a></li>
+                        <li><a href="#">Feature Requests</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="#">License Agreement</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 InventoryPro for Godot. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navLinks.classList.toggle('mobile-active');
+        });
+        
+        // Detailed Features Modal
+        const featuresModal = document.getElementById('features-modal');
+        const viewAllFeaturesBtn = document.getElementById('view-all-features-btn');
+        const modalClose = document.querySelector('.modal-close');
+        
+        viewAllFeaturesBtn.addEventListener('click', () => {
+            document.body.style.overflow = 'hidden';
+            featuresModal.classList.add('active');
+        });
+        
+        modalClose.addEventListener('click', () => {
+            document.body.style.overflow = '';
+            featuresModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        featuresModal.addEventListener('click', (e) => {
+            if (e.target === featuresModal) {
+                document.body.style.overflow = '';
+                featuresModal.classList.remove('active');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+
+                // Close mobile menu if open
+                if (navLinks.classList.contains('mobile-active')) {
+                    mobileMenuBtn.classList.remove('active');
+                    navLinks.classList.remove('mobile-active');
+                }
+            });
+        });
+
+        // Scroll header style change
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Active tab in demo section
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                tabBtns.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // License tabs
+        const licenseTabs = document.querySelectorAll('.license-tab');
+        const licenseContents = document.querySelectorAll('.license-content');
+
+        licenseTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const licenseId = tab.getAttribute('data-license');
+                
+                licenseTabs.forEach(tab => tab.classList.remove('active'));
+                licenseContents.forEach(content => content.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(licenseId).classList.add('active');
+            });
+        });
+
+        // Accordion functionality
+        const accordionItems = document.querySelectorAll('.accordion-item');
+
+        accordionItems.forEach(item => {
+            const header = item.querySelector('.accordion-header');
+            
+            header.addEventListener('click', () => {
+                item.classList.toggle('active');
+            });
+        });
+
+        // Intersection Observer for animations
+        const animateItems = document.querySelectorAll('.feature-card, .pricing-card, .section-title, .hero-text, .hero-image');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        animateItems.forEach(item => {
+            item.style.opacity = 0;
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>
